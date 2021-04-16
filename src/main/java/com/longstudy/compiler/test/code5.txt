@@ -1,0 +1,11 @@
+public class Testclass{
+    static int numb = 100;
+    char value = 'p';
+
+    String str = "mystring";
+
+    float f= 3.1245;
+    int a += numb;
+
+    char c ='4545';
+}

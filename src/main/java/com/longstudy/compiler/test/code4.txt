@@ -1,0 +1,6 @@
+public interface MyInterface{
+
+    public static int number;
+
+    public static void method();
+}

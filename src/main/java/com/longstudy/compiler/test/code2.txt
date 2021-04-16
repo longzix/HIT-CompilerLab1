@@ -1,0 +1,15 @@
+
+int  i=0;
+while(i>10){
+ i++;
+ int b += i;//dada单行注释 直接忽略
+
+ boolean flag = true;/*
+ dasfda
+ fsdfgsdg
+ gdsgfs
+ fsdf
+ 这些是多行注释
+ 请忽略我的存在
+ */
+}

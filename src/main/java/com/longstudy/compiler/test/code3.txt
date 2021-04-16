@@ -1,0 +1,15 @@
+
+
+
+
+int[] a  =new int[100];//定义一个数组
+
+int state =1;
+ switch(state){
+    case 1 :
+     state  = state +90%100;
+     break;
+    case 2 :
+    case 3 :
+ }
+

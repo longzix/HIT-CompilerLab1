@@ -61,7 +61,7 @@ public class Latex {
         String[] texts = text.toString().split("\n");
         boolean hasNote = false;//判断是否存在多行注释
         for(int m = 0; m < texts.length; m++) {
-            String str = texts[m];
+            String str = texts[m];//每行
             if (str.equals(" ") ||str.equals("") )//跳过空行
                 continue;
             char[] strline = str.toCharArray();                //将字符串转化为字符串数组
@@ -80,7 +80,7 @@ public class Latex {
             }
             else {//开始分析
 
-                for(int i = index; i < strline.length; i++){
+                for(int i = index; i < strline.length; i++){//每个字符
                     //遍历strline中的每个字符
                     char ch = strline[i];
                     //初始化token字符串为空
@@ -430,6 +430,7 @@ public class Latex {
 
     //初始化关键字 ,用Set哈希表存储，是的查询为时间 O1
     static void inint(){
+        //分割符
         symbolMap = new HashMap<String, Integer>(){
             {
                 put( ",",11);
@@ -442,6 +443,7 @@ public class Latex {
                 put( "[",18);
                 put( "]",19);}
         };
+        //操作符
         operationMap = new HashMap<String, Integer>(){
             {
                 put("+",20);
@@ -476,6 +478,7 @@ public class Latex {
                 put("&&",52);
                 put("||",53); }
         };
+        //关键字
         keyWorldMap = new HashMap<String, Integer>(){
             {
                 put("private",100);put("protected",101);put("public",102);put("abstract",103);put("class",104);put("extends",105);put("final",106);put("implements",107);put("interface",108);
@@ -530,6 +533,7 @@ public class Latex {
     public static Boolean isAlpha(char ch){
         return ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '_');
     }
+    //判断是否是数字
     public static Boolean isDigit(char ch) {
         return (ch >= '0' && ch <= '9');
     }
@@ -537,7 +541,7 @@ public class Latex {
     public static Boolean isMatchKeyword(String str) {
         return keyWorldMap.containsKey(str);
     }
-    //判断是否是运算符 单个
+    //判断是否是运算符 单个字符
     public static Boolean isSingleOp(char ch) {
         return operationMap.containsKey(String.valueOf(ch));
     }

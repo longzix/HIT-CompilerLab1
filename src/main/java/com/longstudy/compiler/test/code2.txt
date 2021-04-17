@@ -1,6 +1,11 @@
 
 int  i=0;
 while(i>10){
+char a = 'x';
+char v = '\\'
+char z = '\n'
+
+
 char c = 'qqqqqqqqqqqqqqq';
  i++;
  int b += i;//dada单行注释 直接忽略

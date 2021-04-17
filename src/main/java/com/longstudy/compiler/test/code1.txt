@@ -16,5 +16,7 @@ int y = 0x55sdg;
 int z = 021458;
 int num = 134a;
 int abc = 0 + 454;
+/*fhgf*/
+int a = 100;
 
 

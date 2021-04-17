@@ -1,6 +1,7 @@
 package com.longstudy.compiler;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
+import com.alibaba.excel.exception.ExcelGenerateException;
 import com.alibaba.excel.write.metadata.WriteSheet;
 import java.io.BufferedReader;
 import java.io.File;
@@ -39,7 +40,6 @@ public class Latex {
        for (int i = 1; i <= 5; i++) {
             //读取文件
             readFile("src\\main\\java\\com\\longstudy\\compiler\\test\\code"+i+".txt");
-            //testNum();
             analyze();
             for (Patten obj : ansList){
                 System.out.println(obj.toString());
@@ -48,6 +48,7 @@ public class Latex {
                 System.out.println(info.toString());
             }
             writerFile("src\\main\\java\\com\\longstudy\\compiler\\result\\result"+i+".xlsx");
+            //清空数据
             text =new StringBuilder();
             ansList =ansList = new ArrayList<>();
             error = new ArrayList<>();//存储错误信息
@@ -57,7 +58,6 @@ public class Latex {
 
     //扫描分析核心代码
     public static void analyze(){
-
         String[] texts = text.toString().split("\n");
         boolean hasNote = false;//判断是否存在多行注释
         for(int m = 0; m < texts.length; m++) {
@@ -391,9 +391,20 @@ public class Latex {
                             token.append('/');
                             //忽略该行的所有内容
                             break;
-                            //ansList.add(new Object[] {token, "单行注释", "306", m+1});
                         }else if(i< strline.length-1 && strline[i+1] =='*' ) {//多行注释
                             hasNote = true;
+                            //扫描该行
+                            while (i < strline.length) {
+                                if(strline[i] == '*'){
+                                    if(index<strline.length-1 && strline[index] == '/'){
+                                        //找到
+                                        index +=2;//跳过两个
+                                        hasNote =false;
+                                        break;
+                                    }
+                                }
+                                i++;
+                            }
                             break;
                         }else {//是除号
                             //判断 是否是 /=
@@ -465,7 +476,6 @@ public class Latex {
                 put("&&",52);
                 put("||",53); }
         };
-
         keyWorldMap = new HashMap<String, Integer>(){
             {
                 put("private",100);put("protected",101);put("public",102);put("abstract",103);put("class",104);put("extends",105);put("final",106);put("implements",107);put("interface",108);
@@ -502,22 +512,25 @@ public class Latex {
             excelWriter.write(ansList, writeSheet);
             writeSheet = EasyExcel.writerSheet(2, "错误结果").head(Err.class).build();
             excelWriter.write(error, writeSheet);
-        } finally {
+        } catch (Exception e){
+        } finally{
             // 千万别忘记finish 会帮忙关闭流
             if (excelWriter != null) {
-                excelWriter.finish();
+                try{
+                    excelWriter.finish();
+                }catch (Exception e){
+                    System.out.println("文件关闭异常！！！！！！！！！");
+                }
             }
         }
 
     }
 
     //判断字母及下划线
-    public static Boolean isAlpha(char ch)
-    {
+    public static Boolean isAlpha(char ch){
         return ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '_');
     }
-    public static Boolean isDigit(char ch)
-    {
+    public static Boolean isDigit(char ch) {
         return (ch >= '0' && ch <= '9');
     }
     //判断是否是关键字
@@ -525,8 +538,7 @@ public class Latex {
         return keyWorldMap.containsKey(str);
     }
     //判断是否是运算符 单个
-    public static Boolean isSingleOp(char ch)
-    {
+    public static Boolean isSingleOp(char ch) {
         return operationMap.containsKey(String.valueOf(ch));
     }
 

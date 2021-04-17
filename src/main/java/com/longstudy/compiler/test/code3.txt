@@ -1,5 +1,5 @@
 
-
+x /=10;
 
 
 int[] a  =new int[100];//定义一个数组
@@ -12,4 +12,11 @@ int state =1;
     case 2 :
     case 3 :
  }
+ int x = 100 -10;
+ x += 5;
+ x /=1;//dsadad
+ do{
+ x--;
+
+ } while(x>0)
 

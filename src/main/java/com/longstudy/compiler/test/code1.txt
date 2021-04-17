@@ -1,12 +1,20 @@
 
 
-int a=10;
+//以下为正确行式
 double d = 100.0e-5;
-String s = "dasdad";
-char x = '\\';
-char x = '\n';
-char x = '\t';
-char x = '\tdgf';
-int x = 100+0fsdfs+99;
+int x = 0x454fab;
+int eight = 01234521;
+int a = 124e+45;
+int q = 0;
+float f1 = 3.156E+8;
+float f2 = 3.156e+8;
+float f3 = 9.156E-9;
+float f4 = 10.156e-9;
+//以下为错误形式
+int x = 12e012.0;
+int y = 0x55sdg;
+int z = 021458;
+int num = 134a;
+int abc = 0 + 454;
 
 

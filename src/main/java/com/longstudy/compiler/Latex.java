@@ -11,21 +11,8 @@ import java.util.*;
 /**
  * @anthor longzx
  * @create 2021 04 15 20:53
- * @Description
+ * @Description 编译原理 词法分析
  **/
-/*
-public class Testclass{
-    static int numb = 100;
-    char value = 'p';
-
-    String str = "mystring";
-
-    float f= 3.1245;
-    int a += numb;
-
-    char c ='4545';
-}
- */
 
 /**
  * 其他种别码
@@ -43,15 +30,15 @@ public class Latex {
     static Map<String,Integer> operationMap ; //运算符
     static Map<String,Integer> doubleOperationMap ; //两位运算符
     static Map<String,Integer> symbolMap ;  //界符
-    static StringBuilder text = new StringBuilder();
-    static List<Patten> ansList = new ArrayList<>();
-    static List<Err> error = new ArrayList<>();//存储错误信息
+    static StringBuilder text = new StringBuilder();//读取文件的内容 拼接到text上
+    static List<Patten> ansList = new ArrayList<>();//保存分析的结果
+    static List<Err> error = new ArrayList<>();//保存储错误信息
     public static void main(String[] args) {
         //初始化关键字
         inint();
-        //for (int i = 1; i <= 5; i++) {
+       for (int i = 1; i <= 5; i++) {
             //读取文件
-            readFile("src\\main\\java\\com\\longstudy\\compiler\\test\\code"+"1"+".txt");
+            readFile("src\\main\\java\\com\\longstudy\\compiler\\test\\code"+i+".txt");
             //testNum();
             analyze();
             for (Patten obj : ansList){
@@ -60,8 +47,11 @@ public class Latex {
             for (Err info : error){
                 System.out.println(info.toString());
             }
-            writerFile("src\\main\\java\\com\\longstudy\\compiler\\result\\result"+"1"+".xlsx");
-       // }
+            writerFile("src\\main\\java\\com\\longstudy\\compiler\\result\\result"+i+".xlsx");
+            text =new StringBuilder();
+            ansList =ansList = new ArrayList<>();
+            error = new ArrayList<>();//存储错误信息
+       }
 
     }
 
@@ -74,8 +64,7 @@ public class Latex {
             String str = texts[m];
             if (str.equals(" ") ||str.equals("") )//跳过空行
                 continue;
-
-            char[] strline = str.toCharArray();
+            char[] strline = str.toCharArray();                //将字符串转化为字符串数组
             int index =0;
             if(hasNote){//如果有多行注释  找到多行注释的结尾
                 for (; index < strline.length; index++) {
@@ -90,7 +79,7 @@ public class Latex {
                 }
             }
             else {//开始分析
-                //将字符串转化为字符串数组
+
                 for(int i = index; i < strline.length; i++){
                     //遍历strline中的每个字符
                     char ch = strline[i];
@@ -127,6 +116,7 @@ public class Latex {
                                ansList.add(new Patten(m+1,1,"0","整型常量") );
                                break;
                            }
+                           token.append(ch);
                            ch = strline[i];
                            while ( (ch !=' ')&&(ch != '\0') && !isSingleOp(ch) && !symbolMap.containsKey(String.valueOf(ch)) && state !=11){
                                switch (state){
@@ -135,6 +125,7 @@ public class Latex {
                                            token.append(ch);
                                            state=8;
                                        }else if(ch=='x' || ch=='X'){
+                                           token.append(ch);
                                            state =9;
                                        }else {
                                            state =11;
@@ -150,6 +141,7 @@ public class Latex {
                                        break;
                                    case 9:
                                        if(ch>='0'&&ch<='9' || ch >='a' && ch <='f' || ch >= 'A'&& ch<='F'){
+                                           token.append(ch);
                                            state = 10;
                                        }else {
                                            state =11;
@@ -157,6 +149,7 @@ public class Latex {
                                        break;
                                    case 10:
                                        if(ch>='0'&&ch<='9' || ch >='a' && ch <='f' || ch >= 'A'&& ch<='F'){
+                                           token.append(ch);
                                            state = 10;
                                        }else {
                                            state =11;
@@ -171,22 +164,11 @@ public class Latex {
                                }
                                ch = strline[i];
                            }
-                          /* //下一个是分界符或者操作符,或者0是最后一个
-                           if(i+1==strline.length || i+1 <strline.length &&( isSingleOp(strline[i+1]) || symbolMap.containsKey(String.valueOf(strline[i+1])))){
-                               //识别为整数0
-                               ansList.add(new Patten(m+1,1,"0","整型常量") );
-                               //i++;
-                               continue;
-                           }else if(i+1 <strline.length && (strline[i+1] >= '0' && strline[i+1] <='7') || strline[i+1] =='x'||strline[i+1] =='X'){
-                               state =7;
-                           }else {
-                               state =11;//错
-                           }*/
 
                        }else {
                            //初始化进入1状态 ,往十进制方向识别
                            state = 1;
-                           while ( (ch !=' ')&&(ch != '\0') && !isSingleOp(ch) && !symbolMap.containsKey(String.valueOf(ch)) && state !=11) {//
+                           while ( (ch !=' ')&&(ch != '\0') &&( !isSingleOp(ch) || ch =='.'|| ch =='+'|| ch =='-') && !symbolMap.containsKey(String.valueOf(ch)) && state !=11) {//
 //                               if (ch == '.' || ch == 'e') {
 //                                   isfloat = true;
 //                               }
@@ -194,6 +176,7 @@ public class Latex {
                                    case 1://状态1，读入 . 进入状态2，读入e 进入状态4
                                        if(isDigit(ch)){//是数字
                                            token.append(ch);
+                                           state =1;
                                        }else if(ch == '.'){
                                            token.append(ch);
                                            state = 2;//进入状态2
@@ -266,15 +249,15 @@ public class Latex {
                        //错误处理
                        if (haveMistake)
                        {
-                           //一直到“可分割”的字符结束,和操作符
-                           while (ch != '\0' && ch != ',' && ch != ';' && ch != ' '&&!isSingleOp(ch))
+                           //一直到“可分割”的字符结束,和操作符 '.'除外
+                           while (ch != '\0' &&  ch != ' '&&( ch == '.' || !isSingleOp(ch)) && !symbolMap.containsKey(String.valueOf(ch)))
                            {
                                token.append(ch);
                                i++;
                                if(i >= strline.length) break;
                                ch = strline[i];
                            }
-                           error.add(new Err(m+1,"Lexical error at Line ["+String.valueOf(m+1)+"]: [确认无符号常数输入正确]."));
+                           error.add(new Err(m+1,"Lexical error at Line ["+String.valueOf(m+1)+"]: [浮点数或常数输入格式错误]."));
                        }
                        else {
                            if (state==3 || state ==6) {
@@ -288,7 +271,6 @@ public class Latex {
                        }
                        i--;
                     }
-
                     //识别字符常量
                     else if(ch == '\''){
                         //初始化进入1状态
@@ -323,7 +305,7 @@ public class Latex {
                                     }
                                     break;
                                 case 5:
-                                    if(ch == '\\'||ch == 'n' || ch =='b' || ch =='r'||ch =='t'){//几个常见的转义符
+                                    if(ch == '\\'||ch == 'n' || ch =='b' || ch =='r'||ch =='t'||ch=='f'||ch=='0'){//几个常见的转义符
                                         token.append(ch);
                                         state =2;
                                     }else {
@@ -374,30 +356,32 @@ public class Latex {
                         }
                     }
                     //运算符,单个和多个， 这里不包括 除号 / ，/ 在注释里识别
-                    else if (ch != '/' && isSingleOp(ch)){
+                    else if (ch != '/' && isSingleOp(ch)) {
                         StringBuilder s = new StringBuilder();
                         s.append(ch);
                         boolean isTow = false;
                         //判断是否是两位的操作符
-                        if(i+1<strline.length){
-                            s.append(strline[i+1]);
+                        if (i + 1 < strline.length) {
+                            s.append(strline[i + 1]);
                         }
-                        if(doubleOperationMap.containsKey(s.toString())){
+                        if (doubleOperationMap.containsKey(s.toString())) {
                             i++;
                             isTow = true;
                         }
-                        if (isTow) {//两位操作符
+                        if (isTow) {
+                            //两位操作符
                             token.append(s.toString());
-                            ansList.add(new Patten(m+1,doubleOperationMap.get(token.toString()),token.toString(),"操作符") );
+                            ansList.add(new Patten(m + 1, doubleOperationMap.get(token.toString()), token.toString(), "操作符"));
                         } else {
                             token.append(ch);
-                            ansList.add(new Patten(m+1,operationMap.get(token.toString()),token.toString(),"操作符") );
+                            ansList.add(new Patten(m + 1, operationMap.get(token.toString()), token.toString(), "操作符"));
                         }
 
                         /// 和界符
-                    }else if(symbolMap.containsKey(String.valueOf(ch))){
+                    }
+                    //界符，分割符
+                    else if(symbolMap.containsKey(String.valueOf(ch))){
                         token.append(ch);
-                        //ansList.add(new Object[] {token, "界符", "304", m+1});
                         ansList.add(new Patten(m+1,symbolMap.get(token.toString()),token.toString(),"界符") );
                     }
                     //识别注释 单行//  /* 多行  并且包括除号/
@@ -412,8 +396,15 @@ public class Latex {
                             hasNote = true;
                             break;
                         }else {//是除号
-                            //ansList.add(new Object[] {token, "操作符", "/", m+1});
-                            ansList.add(new Patten(m+1,operationMap.get(token.toString()),token.toString(),"操作符") );
+                            //判断 是否是 /=
+                            if (i< strline.length-1 && strline[i+1] =='='){
+                                token.append('=');
+                                i++;
+                                ansList.add(new Patten(m+1,doubleOperationMap.get(token.toString()),token.toString(),"操作符") );// /=
+                            }else {
+                                ansList.add(new Patten(m+1,operationMap.get(token.toString()),token.toString(),"操作符") );
+                            }
+
                         }
                     }
                     //不合法字符
@@ -426,18 +417,55 @@ public class Latex {
         }
     }
 
-
     //初始化关键字 ,用Set哈希表存储，是的查询为时间 O1
     static void inint(){
         symbolMap = new HashMap<String, Integer>(){
-            { put( ",",11);put( ";",12);put( ":",13);put( "(",14);put( ")",15);put( "{",16);put( "}",17); }
+            {
+                put( ",",11);
+                put( ";",12);
+                put( ":",13);
+                put( "(",14);
+                put( ")",15);
+                put( "{",16);
+                put( "}",17);
+                put( "[",18);
+                put( "]",19);}
         };
         operationMap = new HashMap<String, Integer>(){
-            { put("+",20);put("-",21);put("*",22);put("/",23);put("%",24);put("&",25);put("|",26);put("^",27);put("~",28);put(">",29);put("<",30);put("=",31);put("!",32);put(".",33); }
+            {
+                put("+",20);
+                put("-",21);
+                put("*",22);
+                put("/",23);
+                put("%",24);
+                put("&",25);
+                put("|",26);
+                put("^",27);
+                put("~",28);
+                put(">",29);
+                put("<",30);
+                put("=",31);
+                put("!",32);
+                put(".",33); }
         };
         doubleOperationMap = new HashMap<String, Integer>(){
-            { put("++",40);put("--",41);put("-=",42);put("+=",43);put("*=",44);put("/=",45);put("<<",46);put(">>",47);put("==",48);put("!=",49);put(">=",50);put("<=",51);put("&&",52);put("||",53); }
+            {
+                put("++",40);
+                put("--",41);
+                put("-=",42);
+                put("+=",43);
+                put("*=",44);
+                put("/=",45);
+                put("<<",46);
+                put(">>",47);
+                put("==",48);
+                put("!=",49);
+                put(">=",50);
+                put("<=",51);
+                put("&&",52);
+                put("||",53); }
         };
+
         keyWorldMap = new HashMap<String, Integer>(){
             {
                 put("private",100);put("protected",101);put("public",102);put("abstract",103);put("class",104);put("extends",105);put("final",106);put("implements",107);put("interface",108);
@@ -496,124 +524,10 @@ public class Latex {
     public static Boolean isMatchKeyword(String str) {
         return keyWorldMap.containsKey(str);
     }
-    //判断是否是运算符
+    //判断是否是运算符 单个
     public static Boolean isSingleOp(char ch)
     {
         return operationMap.containsKey(String.valueOf(ch));
-    }
-    //测试识别数字功能
-    static void testNum(){
-        String[] texts = text.toString().split("\n");
-        String str = texts[0];
-        char[] strline = str.toCharArray();
-        int i=0;
-        char ch = strline[i];
-        //初始化token字符串为空
-        StringBuilder token = new StringBuilder();
-        //初始化进入1状态
-        int state = 1;
-        boolean isfloat = false;
-        while ( (ch !=' ')&&(ch != '\0') && (isDigit(ch) || ch == '.' || ch == 'e' || ch == 'E'|| ch == '+'|| ch == '-')) {
-            if (ch == '.' || ch == 'e') {
-                isfloat = true;
-            }
-            switch (state) {
-                case 1://状态1，读入 . 进入状态2，读入e 进入状态4
-                    if(isDigit(ch)){//是数字
-                        token.append(ch);
-                    }else if(ch == '.'){
-                        token.append(ch);
-                        state = 2;//进入状态2
-                    }else if(ch =='e' || ch=='E'){
-                        token.append(ch);
-                        state = 4;//进入状态4
-                    }else{//匹配出错
-                        state =7;
-                    }
-                    break;
-                case 2://状态2，读入数字d 进入状态3
-                    if(isDigit(ch)){
-                        token.append(ch);
-                        state =3;
-                    }else {
-                        state =7;
-                    }
-                    break;
-                case 3://状态3，读入数字d 进入状态3 读入e进入状态4
-                    if (isDigit(ch)){
-                        token.append(ch);
-                        state =3;
-                    }else if(ch =='e' || ch=='E'){
-                        token.append(ch);
-                        state =4;
-                    }else {
-                        state =7;
-                    }
-                    break;
-                case 4://状态4，读入 -,+ 进入状态5，读入数字进入状态6
-                    if(ch=='-' || ch=='+'){
-                        token.append(ch);
-                        state =5;
-                    }else if(isDigit(ch)){
-                        token.append(ch);
-                        state =6;
-                    }else {
-                        state =7;
-                    }
-                    break;
-                case 5://状态5， 度输入数字进入 状态 6
-                    if(isDigit(ch)){
-                        token.append(ch);
-                        state =6;
-                    }else {
-                        state =7;
-                    }
-                    break;
-                case 6://状态6， 读入数字进入状态6
-                    if(isDigit(ch)){
-                        token.append(ch);
-                        state =6;
-                    }else {
-                        state =7;
-                    }
-                    break;
-            }
-            if (state ==7) {break;}//错误状态
-            //遍历符号先前移动
-            i++;
-            if (i >= strline.length) break;
-            ch = strline[i];
-        }
-        Boolean haveMistake = false;
-        if (state == 2 || state == 4 || state == 5 || state ==7)//非终结状态或出错状态
-        {
-            haveMistake = true;
-        }
-        //错误处理
-        if (haveMistake)
-        {
-            //一直到“可分割”的字符结束
-            while (ch != '\0' && ch != ',' && ch != ';' && ch != ' ')
-            {
-                token.append(ch);
-                i++;
-                if(i >= strline.length) break;
-                ch = strline[i];
-            }
-            System.out.println(token + " 确认无符号常数输入正确");
-
-        }
-        else {
-            if (isfloat)
-            {
-                System.out.println(token+"浮点型常量"+"300");
-
-            }
-            else {
-                System.out.println(token+"整型常量"+"301");
-            }
-        }
-        i--;
     }
 
 }
